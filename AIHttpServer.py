@@ -22,7 +22,12 @@ import mimetypes
 import re
 from io import BytesIO
 import json
+import socket
  
+def GetIP():
+    name = socket.getfqdn(socket.gethostname())
+    addr = socket.gethostbyname(name)
+    return name,addr
  
 class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
  
@@ -297,7 +302,8 @@ def start_server(HandlerClass = SimpleHTTPRequestHandler,
          ServerClass = http.server.HTTPServer):
     #http.server.test(HandlerClass, ServerClass)
     
-    host = ('localhost', 8888)
+    name ,addr = GetIP()
+    host = (addr, 8888)
     server = http.server.HTTPServer(host, SimpleHTTPRequestHandler)
     print('Starting server, listen at: %s:%s' % host)
     server.serve_forever()
