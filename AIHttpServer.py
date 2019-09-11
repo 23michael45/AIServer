@@ -52,12 +52,18 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
             if f:
                 self.copyfile(f, self.wfile)
                 f.close()
-        elif self.path == '/getShape':
+        elif self.path == '/getShapeJ':
             data = {'result':'this is a circle'}
             self.send_response(200)
             self.send_header('Content-type','application/json')
             self.end_headers()
             self.wfile.write(json.dumps(data).encode())
+        elif self.path == '/getShape':
+            self.path = "/"
+            f = self.send_head()
+            if f:
+                self.copyfile(f, self.wfile)
+                f.close()
  
     def do_HEAD(self):
         """Serve a HEAD request."""
