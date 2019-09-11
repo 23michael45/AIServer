@@ -21,6 +21,7 @@ import shutil
 import mimetypes
 import re
 from io import BytesIO
+import json
  
  
 class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
@@ -41,10 +42,17 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
  
     def do_GET(self):
         """Serve a GET request."""
-        f = self.send_head()
-        if f:
-            self.copyfile(f, self.wfile)
-            f.close()
+        if (self.path == '/'):
+            f = self.send_head()
+            if f:
+                self.copyfile(f, self.wfile)
+                f.close()
+        elif self.path == '/getShape':
+            data = {'result':'this is a circle'}
+            self.send_response(200)
+            self.send_header('Content-type','application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps(data).encode())
  
     def do_HEAD(self):
         """Serve a HEAD request."""
@@ -285,7 +293,7 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
         })
  
  
-def test(HandlerClass = SimpleHTTPRequestHandler,
+def start_server(HandlerClass = SimpleHTTPRequestHandler,
          ServerClass = http.server.HTTPServer):
     #http.server.test(HandlerClass, ServerClass)
     
@@ -295,6 +303,6 @@ def test(HandlerClass = SimpleHTTPRequestHandler,
     server.serve_forever()
  
 if __name__ == '__main__':
-    test()   
+    start_server()   
 
 
