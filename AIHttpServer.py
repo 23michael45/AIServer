@@ -28,7 +28,6 @@ def GetIP():
     name = socket.getfqdn(socket.gethostname())
     addr = socket.gethostbyname(name)
     return name,addr
- 
 class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
  
     """Simple HTTP request handler with GET/HEAD/POST commands.
@@ -309,7 +308,7 @@ def start_server(HandlerClass = SimpleHTTPRequestHandler,
     #http.server.test(HandlerClass, ServerClass)
     
     name ,addr = GetIP()
-    host = (addr, 8888)
+    host = ('0.0.0.0', 8888)
     server = http.server.HTTPServer(host, SimpleHTTPRequestHandler)
     print('Starting server, listen at: %s:%s' % host)
     server.serve_forever()
