@@ -59,4 +59,4 @@ class Ui_MainWindow(object):
         self.GetBtn.setText(_translate("MainWindow", "Get"))
         self.PostBtn.setText(_translate("MainWindow", "Post"))
         self.label_2.setText(_translate("MainWindow", "PostData"))
-        self.label_3.setText(_translate("MainWindow", "PostUrl"))
+        self.label_3.setText(_translate("MainWindow", "GetUrl"))

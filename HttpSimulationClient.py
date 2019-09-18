@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import urllib
+import urllib.request
+
  
 from PyQt5.QtWidgets import QApplication, QWidget, QMessageBox,QMainWindow
 from PyQt5 import uic
@@ -10,30 +12,6 @@ from HttpSimulationClient_ui import *
 import numpy as np
 import sys
 import json
-
-
-def HttpGet():
-    url = "http://192.168.81.16/cgi-bin/python_test/test.py?ServiceCode=aaaa"
-
-    req = urllib.request.Request(url)
-    print(req)
-
-    res_data = urllib.request.urlopen(req)
-    res = res_data.read()
-    print(res)
-
-def HttpPost():
-    jsondata = {'ssid':'xxxx','password':'xxxxxxxx',"server_ip":"xxx.xxx.xxx.xxx"}
-    jsondata_urlencode = urllib.urlencode(jsondata)
-
-    requrl = "http://192.168.81.16/cgi-bin/python_test/test.py"
-
-    req = urllib.request.Request(url = requrl,data =jsondata_urlencode)
-    print(req)
-
-    res_data = urllib.request.urlopen(req)
-    res = res_data.read()
-    print(res)
 
 
 class ClientMainWin(Ui_MainWindow):
@@ -55,21 +33,26 @@ class ClientMainWin(Ui_MainWindow):
         req = urllib.request.Request(geturl)
         print(req)
 
-        res_data = urllib.request.urlopen(req)
-        res = res_data.read()
-        print(res)
+        try:
+            res_data = urllib.request.urlopen(req)
+            res = res_data.read()
+            print(res)
+        except IOError:
+            print('http get error')
    def post(self):
         
         posturl = self.PostUrlText.toPlainText();
         jsondata = self.PostDataText.toPlainText();
         jsondata=bytes(jsondata,'utf8')
-
-        req = urllib.request.Request(posturl)
-        req.add_header('Content-Type', 'application/json')
+        try:
+            req = urllib.request.Request(posturl)
+            req.add_header('Content-Type', 'application/json')
        
-        res_data = urllib.request.urlopen(req,jsondata)
-        res = res_data.read()
-        print(res)
+            res_data = urllib.request.urlopen(req,jsondata)
+            res = res_data.read()
+            print(res)
+        except IOError:
+            print('http post error')
 def main():
     app = QApplication(sys.argv)
     mainWin = QMainWindow()

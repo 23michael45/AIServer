@@ -76,7 +76,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>PostUrl</string>
+     <string>GetUrl</string>
     </property>
    </widget>
    <widget class="QTextEdit" name="PostDataText">
