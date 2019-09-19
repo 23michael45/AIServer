@@ -18,16 +18,19 @@ import slim.train_image_classifier
 
 import cards
 
-datasets.dataset_factory.datasets_map['cards'] = cards
+#datasets.dataset_factory.datasets_map['cards'] = cards
 
 
-sys.argv.append('--train_dir=D:/DevelopProj/Dadao/ESP32Project/Datasets/Image80/Dst/train')
-sys.argv.append('--dataset_name=cards')
+sys.argv.append('--train_dir=D:/DevelopProj/Dadao/ESP32Project/Datasets/Flowers/train')
+sys.argv.append('--dataset_name=flowers')
 sys.argv.append('--dataset_split_name=train')
-sys.argv.append('--dataset_dir=D:/DevelopProj/Dadao/ESP32Project/Datasets/Image80/Dst/tfrecord')
+sys.argv.append('--dataset_dir=D:/DevelopProj/Dadao/ESP32Project/Datasets/Flowers/tfrecord')
 sys.argv.append('--batch_size=5')
 sys.argv.append('--max_number_of_steps=10000')
 sys.argv.append('--model_name=inception_v3')
 sys.argv.append('--clone_on_cpu=true')
+sys.argv.append('--checkpoint_path=D:/DevelopProj/Tensorflow/pretrained/inception_v3.ckpt')
+sys.argv.append('--checkpoint_exclude_scopes=InceptionV3/Logits,InceptionV3/AuxLogits')
+sys.argv.append('--trainable_scopes=InceptionV3/Logits,InceptionV3/AuxLogits')
 
 slim.train_image_classifier.main(sys.argv)
