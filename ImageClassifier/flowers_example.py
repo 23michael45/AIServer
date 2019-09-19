@@ -21,17 +21,18 @@ else:
 sys.path.append(TensorflowPath + 'models/research/')
 sys.path.append(TensorflowPath + 'models/research/slim')
 import slim
-import slim.download_and_convert_data
-import slim.train_image_classifier
-import slim.eval_image_classifier
 
 def tfrecord():
+    
+    import slim.download_and_convert_data
     sys.argv.append('--dataset_name=flowers')
     sys.argv.append('--dataset_dir=/Flowers/rfrecord')
     slim.download_and_convert_data.main(sys.argv)
 
 
 def train():
+    
+    import slim.train_image_classifier
     sys.argv.append('--train_dir=' + DatasetsPath + 'Flowers/train')
     sys.argv.append('--dataset_name=flowers')
     sys.argv.append('--dataset_split_name=train')
@@ -46,6 +47,8 @@ def train():
 
     slim.train_image_classifier.main(sys.argv)
 def eval():
+    
+    import slim.eval_image_classifier
     sys.argv.append('--alsologtostderr')
     sys.argv.append('--dataset_name=flowers')
     sys.argv.append('--checkpoint_path=' + DatasetsPath + 'train_logs')     # fine-tuning位置
