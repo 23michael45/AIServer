@@ -20,11 +20,17 @@ _NUM_TEST = 50
 _RANDOM_SEED = 0
 #数据块 把图片进行分割，对于数据量比较大的时候使用
 _NUM_SHARDS = 5
-#数据集路径
-DATASET_DIR = 'D:/DevelopProj/Dadao/ESP32Project/Datasets/Image80/Dst/tfrecord'
-#标签和文件名字
-LABELS_FILENAME = 'D:/DevelopProj/Dadao/ESP32Project/Datasets/Image80/Dst/tfrecord/labels.txt'
-
+if os.name == "nt":
+    #数据集路径
+    DATASET_DIR = 'D:/DevelopProj/Dadao/ESP32Project/Datasets/Image80/Dst/tfrecord'
+    #标签和文件名字
+    LABELS_FILENAME = 'D:/DevelopProj/Dadao/ESP32Project/Datasets/Image80/Dst/tfrecord/labels.txt'
+else:
+    
+    #数据集路径
+    DATASET_DIR = '/media/jerry/f0bb2ff2-cab9-46b3-8e2b-beae1c413d67/DevelopProj/Dadao/ESP32Project/Datasets/Image80/Dst/tfrecord'
+    #标签和文件名字
+    LABELS_FILENAME = '/media/jerry/f0bb2ff2-cab9-46b3-8e2b-beae1c413d67/DevelopProj/Dadao/ESP32Project/Datasets/Image80/Dst/tfrecord/labels.txt'
 
 class ImageReader(object):
   """Helper class that provides TensorFlow image coding utilities."""
