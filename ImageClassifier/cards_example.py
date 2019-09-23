@@ -24,20 +24,24 @@ sys.path.append(TensorflowPath + 'models/research/slim')
 import slim
 
 def tfrecord():
-    
-    import slim.download_and_convert_data
-    sys.argv.append('--dataset_name=flowers')
-    sys.argv.append('--dataset_dir=' + DatasetsPath +'Flowers/tfrecord')
-    slim.download_and_convert_data.main(sys.argv)
+    import download_and_convert_cards
+    sys.argv.append('--dataset_name=cards')
+    sys.argv.append('--dataset_dir=' + DatasetsPath +'Image80/Dst')
+    download_and_convert_cards.main()
 
 
 def train():
+    import slim
+    import datasets.dataset_factory
+    import cards
     
+    datasets.dataset_factory.datasets_map['cards'] = cards
+
     import slim.train_image_classifier
-    sys.argv.append('--train_dir=' + DatasetsPath + 'Flowers/train')
-    sys.argv.append('--dataset_name=flowers')
+    sys.argv.append('--train_dir=' + DatasetsPath + 'Image80/Dst/train')
+    sys.argv.append('--dataset_name=cards')
     sys.argv.append('--dataset_split_name=train')
-    sys.argv.append('--dataset_dir=' + DatasetsPath + 'Flowers/tfrecord')
+    sys.argv.append('--dataset_dir=' + DatasetsPath + 'Image80/Dst/tfrecord')
     sys.argv.append('--batch_size=5')
     sys.argv.append('--max_number_of_steps=10000')
     sys.argv.append('--model_name=inception_v3')
@@ -50,15 +54,15 @@ def train():
 def eval():
     
     import slim.eval_image_classifier
-    sys.argv.append('--dataset_name=flowers')
-    sys.argv.append('--checkpoint_path=' + DatasetsPath + 'Flowers/train')     # fine-tuning位置
-    sys.argv.append('--dataset_dir=' + DatasetsPath + 'Flowers/tfrecord')
+    sys.argv.append('--dataset_name=cards')
+    sys.argv.append('--checkpoint_path=' + DatasetsPath + 'Image80/Dst/train')     # fine-tuning位置
+    sys.argv.append('--dataset_dir=' + DatasetsPath + 'Image80/Dst/tfrecord')
     sys.argv.append('--dataset_split_name=validation')
     sys.argv.append('--model_name=inception_v3')
     sys.argv.append('--batch_size=5')
 
     slim.eval_image_classifier.main(sys.argv)
 if __name__ == '__main__':
-    tfrecord()
-    #train()
+    #tfrecord()
+    train()
     #eval()

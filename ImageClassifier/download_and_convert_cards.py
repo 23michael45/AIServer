@@ -7,12 +7,12 @@ import random
 import math
 import sys
 import types
-from PIL import Image
 import sys
 
 sys.path.append('D:/DevelopProj/Tensorflow/models/research/')
 import slim
 
+from datasets import dataset_utils
 
 #验证集数量
 _NUM_TEST = 50
@@ -21,11 +21,29 @@ _RANDOM_SEED = 0
 #数据块 把图片进行分割，对于数据量比较大的时候使用
 _NUM_SHARDS = 5
 #数据集路径
-DATASET_DIR = 'D:/DevelopProj/Dadao/ESP32Project/Datasets/Image80/Dst'
+DATASET_DIR = 'D:/DevelopProj/Dadao/ESP32Project/Datasets/Image80/Dst/tfrecord'
 #标签和文件名字
-LABELS_FILENAME = 'D:/DevelopProj/Dadao/ESP32Project/Datasets/Image80/Dst/output_labels.txt'
+LABELS_FILENAME = 'D:/DevelopProj/Dadao/ESP32Project/Datasets/Image80/Dst/tfrecord/labels.txt'
 
 
+class ImageReader(object):
+  """Helper class that provides TensorFlow image coding utilities."""
+
+  def __init__(self):
+    # Initializes function that decodes RGB JPEG data.
+    self._decode_jpeg_data = tf.placeholder(dtype=tf.string)
+    self._decode_jpeg = tf.image.decode_jpeg(self._decode_jpeg_data, channels=3)
+
+  def read_image_dims(self, sess, image_data):
+    image = self.decode_jpeg(sess, image_data)
+    return image.shape[0], image.shape[1]
+
+  def decode_jpeg(self, sess, image_data):
+    image = sess.run(self._decode_jpeg,
+                     feed_dict={self._decode_jpeg_data: image_data})
+    assert len(image.shape) == 3
+    assert image.shape[2] == 3
+    return image
 
 
 #定义tfrecord文件的路径和名字
@@ -50,9 +68,12 @@ def _get_filenames_and_classes(dataset_dir):
     directories = []
     #分类名称
     class_names = []
-    for filename in os.listdir(dataset_dir):
+
+    cards_root  = os.path.join(dataset_dir, 'cards_photos')
+
+    for filename in os.listdir(cards_root):
         #合并文件路径
-        path = os.path.join(dataset_dir,filename)
+        path = os.path.join(cards_root,filename)
         #判断该路径是否为目录
         if os.path.isdir(path):
             #加入数据目录
@@ -78,11 +99,13 @@ def bytes_feature(values):
     return tf.train.Feature(bytes_list=tf.train.BytesList(value=[values]))
  
  
-def image_to_tfexample(image_data,image_format,class_id):
+def image_to_tfexample(image_data,image_format, height, width,class_id):
     return tf.train.Example(features=tf.train.Features(feature={
         'image/encoded': bytes_feature(image_data),
         'image/format' : bytes_feature(image_format),
-        'image/class/label' : int64_feature(class_id)
+        'image/class/label' : int64_feature(class_id),
+        'image/height': int64_feature(height),
+        'image/width': int64_feature(width),
     }))
  
  
@@ -104,11 +127,14 @@ def _convert_dataset(split_name,filenames,class_names_to_ids,dataset_dir):
     #计算每个数据块有多少个数据
     num_per_shard = int(len(filenames) / _NUM_SHARDS)
     with tf.Graph().as_default():
+        
+        image_reader = ImageReader()
+
         with tf.Session() as sess:
             for shard_id in range(_NUM_SHARDS):
                 #定义tfrecord文件的路径+名字
                 output_filename = _get_dataset_filename(dataset_dir,split_name,shard_id)
-                with tf.python_io.TFRecordWriter(output_filename) as tfrecore_writer:
+                with tf.python_io.TFRecordWriter(output_filename) as tfrecord_writer:
                     #每一个数据块开始的位置
                     start_ndx = shard_id * num_per_shard
                     #每一个数据块最后的位置
@@ -118,19 +144,18 @@ def _convert_dataset(split_name,filenames,class_names_to_ids,dataset_dir):
                         try:
                             sys.stdout.write('\r>> Converting image %d/%d shard %d' % (i+1,len(filenames),shard_id))
                             sys.stdout.flush()
-                            #读取图片
-                            #image_data = tf.gfile.FastGFile(filenames[i],'rb').read()
-                            img = Image.open(filenames[i])
-                            #img = img.resize((224, 224))
-                            img_raw = img.tobytes()
-                             #获取图片的类别名称
+                            
+                             # Read the filename:
+                            image_data = tf.gfile.GFile(filenames[i], 'rb').read()
+                            height, width = image_reader.read_image_dims(sess, image_data)
+
                             class_name = os.path.basename(os.path.dirname(filenames[i]))
-                            #找到类别名称对应的id
                             class_id = class_names_to_ids[class_name]
-                            #生成tfrecord文件
-                            example = image_to_tfexample(img_raw, b'jpg',class_id)
-                           # print(filenames[i])
-                            tfrecore_writer.write(example.SerializeToString())
+
+                            example = dataset_utils.image_to_tfexample(
+                                image_data, b'jpg', height, width, class_id)
+                            tfrecord_writer.write(example.SerializeToString())
+
                         except IOError as e:
                             print("Could not read: ",filenames[i])
                             print("Error: ",e)
