@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{92c6ca46-6e58-414a-be47-77686b59e59a}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>ImageClassifier\cards_example.py</StartupFile>
+    <StartupFile>ImageClassifier\shapes_example.py</StartupFile>
     <SearchPath />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -32,7 +32,10 @@
     </Compile>
     <Compile Include="ImageClassifier\download_and_convert_cards.py" />
     <Compile Include="ImageClassifier\cards.py" />
+    <Compile Include="ImageClassifier\download_and_convert_shapes.py" />
     <Compile Include="ImageClassifier\flowers_example.py" />
+    <Compile Include="ImageClassifier\shapes.py" />
+    <Compile Include="ImageClassifier\shapes_example.py" />
     <Compile Include="ImageClassifier\train.py">
       <SubType>Code</SubType>
     </Compile>

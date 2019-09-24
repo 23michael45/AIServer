@@ -24,24 +24,24 @@ sys.path.append(TensorflowPath + 'models/research/slim')
 import slim
 
 def tfrecord():
-    import download_and_convert_cards
-    sys.argv.append('--dataset_name=cards')
-    sys.argv.append('--dataset_dir=' + DatasetsPath +'Image80/Dst')
-    download_and_convert_cards.main()
+    import download_and_convert_shapes
+    sys.argv.append('--dataset_name=shapes')
+    sys.argv.append('--dataset_dir=' + DatasetsPath +'Shapes/Dst')
+    download_and_convert_shapes.main()
 
 
 def train():
     import slim
     import datasets.dataset_factory
-    import cards
+    import shapes
     
-    datasets.dataset_factory.datasets_map['cards'] = cards
+    datasets.dataset_factory.datasets_map['shapes'] = shapes
 
     import slim.train_image_classifier
-    sys.argv.append('--train_dir=' + DatasetsPath + 'Image80/Dst/train')
-    sys.argv.append('--dataset_name=cards')
+    sys.argv.append('--train_dir=' + DatasetsPath + 'Shapes/Dst/train')
+    sys.argv.append('--dataset_name=shapes')
     sys.argv.append('--dataset_split_name=train')
-    sys.argv.append('--dataset_dir=' + DatasetsPath + 'Image80/Dst/tfrecord')
+    sys.argv.append('--dataset_dir=' + DatasetsPath + 'Shapes/Dst/tfrecord')
     sys.argv.append('--batch_size=5')
     sys.argv.append('--max_number_of_steps=10000')
     sys.argv.append('--model_name=inception_v3')
@@ -54,20 +54,20 @@ def train():
 def eval():
     import slim
     import datasets.dataset_factory
-    import cards
+    import shapes
     
-    datasets.dataset_factory.datasets_map['cards'] = cards
+    datasets.dataset_factory.datasets_map['shapes'] = shapes
 
     import slim.eval_image_classifier
-    sys.argv.append('--dataset_name=cards')
-    sys.argv.append('--checkpoint_path=' + DatasetsPath + 'Image80/Dst/train')     # fine-tuning位置
-    sys.argv.append('--dataset_dir=' + DatasetsPath + 'Image80/Dst/tfrecord')
+    sys.argv.append('--dataset_name=shapes')
+    sys.argv.append('--checkpoint_path=' + DatasetsPath + 'Shapes/Dst/train')     # fine-tuning位置
+    sys.argv.append('--dataset_dir=' + DatasetsPath + 'Shapes/Dst/tfrecord')
     sys.argv.append('--dataset_split_name=test')
     sys.argv.append('--model_name=inception_v3')
     sys.argv.append('--batch_size=5')
 
     slim.eval_image_classifier.main(sys.argv)
 if __name__ == '__main__':
-    #tfrecord()
-    #train()
+    tfrecord()
+    train()
     eval()
