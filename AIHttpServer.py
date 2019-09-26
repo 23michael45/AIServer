@@ -42,7 +42,7 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
     request omits the actual contents of the file.
 
     """
- 
+    mac_ip_dict = {}
     server_version = "SimpleHTTPWithUpload/" + __version__
  
     def do_GET(self):
@@ -71,33 +71,80 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
         if f:
             f.close()
  
-    def do_POST(self):
-        """Serve a POST request."""
-        r, info = self.deal_post_data()
-        print((r, info, "by: ", self.client_address))
+    def LoadJson(self):
+        content_len = int(self.headers['Content-Length'])
+        encode_json = self.rfile.read(content_len)
+        decode_json = json.loads(encode_json)
+        return decode_json
+    def WriteJson(self,dict):
+        jstr = json.dumps(dict)
         f = BytesIO()
-        f.write(b'<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">')
-        f.write(b"<html>\n<title>Upload Result Page</title>\n")
-        f.write(b"<body>\n<h2>Upload Result Page</h2>\n")
-        f.write(b"<hr>\n")
-        if r:
-            f.write(b"<strong>Success:</strong>")
-        else:
-            f.write(b"<strong>Failed:</strong>")
-        f.write(info.encode())
-        f.write(("<br><a href=\"%s\">back</a>" % self.headers['referer']).encode())
-        f.write(b"<hr><small>Powerd By: bones7456, check new version at ")
-        f.write(b"<a href=\"http://li2z.cn/?s=SimpleHTTPServerWithUpload\">")
-        f.write(b"here</a>.</small></body>\n</html>\n")
+        f.write(bytes(jstr, encoding = "utf8")  )
         length = f.tell()
         f.seek(0)
         self.send_response(200)
-        self.send_header("Content-type", "text/html")
+        self.send_header("Content-type", "application/json")
         self.send_header("Content-Length", str(length))
         self.end_headers()
         if f:
             self.copyfile(f, self.wfile)
             f.close()
+    def do_POST(self):
+        """Serve a POST request."""
+        if(self.path == '/MACandLIP'):
+            decode_json = self.LoadJson()
+            self.mac_ip_dict[decode_json['MAC']] =decode_json['LIP']
+
+            jdict = {'status': 'ok'}
+            self.WriteJson(jdict)
+            
+        elif(self.path == '/MAC'):
+            decode_json = self.LoadJson()
+            mac = decode_json['MAC']
+            
+            jdict = {'MAC': '','LIP':''}
+            jdict['MAC'] = mac;
+
+            if mac in self.mac_ip_dict:
+                jdict['LIP'] = self.mac_ip_dict[mac];
+
+            self.WriteJson(jdict)
+        elif(self.path == '/Image'):
+            content_len = int(self.headers['Content-Length'])
+            data = self.rfile.read(content_len)
+            print(content_len)
+
+            jdict = {"category":"shape", "color":"xxx","shape":"xxx"}
+            #jdict = {"category":"letter","color":"xxx","letter","xxx"}
+            #jdict = {"category":"number","color":"xxx","number","xxx"}
+            #jdict = {"category":"fail"}
+            self.WriteJson(jdict);
+        else:
+            r, info = self.deal_post_data()
+            print((r, info, "by: ", self.client_address))
+            f = BytesIO()
+            f.write(b'<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">')
+            f.write(b"<html>\n<title>Upload Result Page</title>\n")
+            f.write(b"<body>\n<h2>Upload Result Page</h2>\n")
+            f.write(b"<hr>\n")
+            if r:
+                f.write(b"<strong>Success:</strong>")
+            else:
+                f.write(b"<strong>Failed:</strong>")
+            f.write(info.encode())
+            f.write(("<br><a href=\"%s\">back</a>" % self.headers['referer']).encode())
+            f.write(b"<hr><small>Powerd By: bones7456, check new version at ")
+            f.write(b"<a href=\"http://li2z.cn/?s=SimpleHTTPServerWithUpload\">")
+            f.write(b"here</a>.</small></body>\n</html>\n")
+            length = f.tell()
+            f.seek(0)
+            self.send_response(200)
+            self.send_header("Content-type", "text/html")
+            self.send_header("Content-Length", str(length))
+            self.end_headers()
+            if f:
+                self.copyfile(f, self.wfile)
+                f.close()
         
     def deal_post_data(self):
         content_type = self.headers['content-type']
