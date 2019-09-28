@@ -15,6 +15,7 @@ __all__ = ["SimpleHTTPRequestHandler"]
 import os
 import posixpath
 import http.server
+from http.server import HTTPServer, SimpleHTTPRequestHandler, test
 import urllib.request, urllib.parse, urllib.error
 import cgi
 import shutil
@@ -23,13 +24,16 @@ import re
 from io import BytesIO
 import json
 import socket
+import PIL
+from PIL import Image
+from ImageClassifier.shapes_example import getShape
 
  
 def GetIP():
     name = socket.getfqdn(socket.gethostname())
     addr = socket.gethostbyname(name)
     return name,addr
-class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
+class AIServer(http.server.SimpleHTTPRequestHandler):
  
     """Simple HTTP request handler with GET/HEAD/POST commands.
 
@@ -89,8 +93,40 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
         if f:
             self.copyfile(f, self.wfile)
             f.close()
-    def do_POST(self):
-        """Serve a POST request."""
+    def deal_formdata(self):
+        content_type = self.headers['content-type']
+        if not content_type:
+            return (False, "Content-Type header doesn't contain boundary")
+        contents = content_type.split("=")
+
+        if(len(contents) < 2):
+                return (False, "Content-Type header size < 2")
+        boundary = contents[1].encode()
+        remainbytes = int(self.headers['content-length'])
+        
+        line = self.rfile.readline()
+        remainbytes -= len(line)
+        if not boundary in line:
+            return (False, "Content NOT begin with boundary")
+        line = self.rfile.readline()
+        remainbytes -= len(line)
+        fn = re.findall(r'Content-Disposition.*name="file"; filename="(.*)"', line.decode())
+        if not fn:
+            return (False, "Can't find out file name...")
+        path = self.translate_path(self.path)
+        fn = os.path.join(path, fn[0])
+        line = self.rfile.readline()
+        remainbytes -= len(line)
+        line = self.rfile.readline()
+        remainbytes -= len(line)
+
+        filedata = self.rfile.read(remainbytes);
+        byte_stream = BytesIO(filedata);
+        image = Image.open(byte_stream)
+        #image.show()
+        return image
+
+    def process(self):
         if(self.path == '/MACandLIP'):
             decode_json = self.LoadJson()
             self.mac_ip_dict[decode_json['MAC']] =decode_json['LIP']
@@ -110,11 +146,12 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
 
             self.WriteJson(jdict)
         elif(self.path == '/Image'):
-            content_len = int(self.headers['Content-Length'])
-            data = self.rfile.read(content_len)
-            print(content_len)
 
-            jdict = {"category":"shape", "color":"xxx","shape":"xxx"}
+            image = self.deal_formdata()
+
+
+            jdict = {"category":"shape", "color":"0","shape":"xxx"}
+            jdict['shape'] = getShape(image)
             #jdict = {"category":"letter","color":"xxx","letter","xxx"}
             #jdict = {"category":"number","color":"xxx","number","xxx"}
             #jdict = {"category":"fail"}
@@ -145,6 +182,12 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
             if f:
                 self.copyfile(f, self.wfile)
                 f.close()
+    def do_OPTIONS(self):
+        self.process()
+    def do_POST(self):
+        """Serve a POST request."""
+        self.process()
+       
         
     def deal_post_data(self):
         content_type = self.headers['content-type']
@@ -355,16 +398,27 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
         else:
             return self.extensions_map['']
  
-    if not mimetypes.inited:
-        mimetypes.init() # try to read system mime.types
-    extensions_map = mimetypes.types_map.copy()
-    extensions_map.update({
-        '': 'application/octet-stream', # Default
-        '.py': 'text/plain',
-        '.c': 'text/plain',
-        '.h': 'text/plain',
-        })
- 
+
+        if not mimetypes.inited:
+            mimetypes.init() # try to read system mime.types
+        extensions_map = mimetypes.types_map.copy()
+        extensions_map.update({
+            '': 'application/octet-stream', # Default
+            '.py': 'text/plain',
+            '.c': 'text/plain',
+            '.h': 'text/plain',
+            })
+
+    def end_headers(self):
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Origin, Accept, Content-Type, X-Requested-With, X-CSRF-Token')
+        SimpleHTTPRequestHandler.end_headers(self)
+    
+class CORSRequestHandler (SimpleHTTPRequestHandler):
+    def end_headers (self):
+        self.send_header('Access-Control-Allow-Origin', '*')
+        SimpleHTTPRequestHandler.end_headers(self)
  
 def start_server(HandlerClass = SimpleHTTPRequestHandler,
          ServerClass = http.server.HTTPServer):
@@ -372,7 +426,7 @@ def start_server(HandlerClass = SimpleHTTPRequestHandler,
     
     name ,addr = GetIP()
     host = ('0.0.0.0', 8888)
-    server = http.server.HTTPServer(host, SimpleHTTPRequestHandler)
+    server = http.server.HTTPServer(host, AIServer)
     print('Starting server, listen at: %s:%s' % host)
     server.serve_forever()
  

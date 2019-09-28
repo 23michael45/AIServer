@@ -46,9 +46,9 @@ def train():
     sys.argv.append('--max_number_of_steps=10000')
     sys.argv.append('--model_name=inception_v3')
     sys.argv.append('--clone_on_cpu=true')
-    sys.argv.append('--checkpoint_path=' + TensorflowPath + 'pretrained/inception_v3.ckpt')
-    sys.argv.append('--checkpoint_exclude_scopes=InceptionV3/Logits,InceptionV3/AuxLogits')
-    sys.argv.append('--trainable_scopes=InceptionV3/Logits,InceptionV3/AuxLogits')
+    #sys.argv.append('--checkpoint_path=' + TensorflowPath + 'pretrained/inception_v3.ckpt')
+    #sys.argv.append('--checkpoint_exclude_scopes=InceptionV3/Logits,InceptionV3/AuxLogits')
+    #sys.argv.append('--trainable_scopes=InceptionV3/Logits,InceptionV3/AuxLogits')
 
     slim.train_image_classifier.main(sys.argv)
 def eval():
@@ -67,7 +67,19 @@ def eval():
     sys.argv.append('--batch_size=5')
 
     slim.eval_image_classifier.main(sys.argv)
+
+def getShape(image):
+    #image.show()
+
+    dict = { 0:'pentagon',
+    1:'octagon',
+    2:'hexagon',
+    3:'circle',
+    4:'rectangular',
+    5:'square'}
+
+    return dict[4]
 if __name__ == '__main__':
-    tfrecord()
-    train()
+    #tfrecord()
+    #train()
     eval()
