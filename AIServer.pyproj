@@ -27,6 +27,9 @@
     </Compile>
     <Compile Include="HttpSimulationClient.py" />
     <Compile Include="HttpSimulationClient_ui.py" />
+    <Compile Include="ImageClassifier\AIModule.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="ImageClassifier\cards_example.py">
       <SubType>Code</SubType>
     </Compile>

@@ -26,7 +26,7 @@ import json
 import socket
 import PIL
 from PIL import Image
-from ImageClassifier.shapes_example import getShape
+from ImageClassifier.AIModule import getShape
 
  
 def GetIP():
