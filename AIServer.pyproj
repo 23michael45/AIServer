@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{92c6ca46-6e58-414a-be47-77686b59e59a}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>AIHttpServer.py</StartupFile>
+    <StartupFile>ImageClassifier\flowers_example.py</StartupFile>
     <SearchPath />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>

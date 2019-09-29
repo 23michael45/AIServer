@@ -60,5 +60,5 @@ def eval():
     slim.eval_image_classifier.main(sys.argv)
 if __name__ == '__main__':
     #tfrecord()
-    train()
+    #train()
     eval()
