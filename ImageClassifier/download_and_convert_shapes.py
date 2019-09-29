@@ -15,7 +15,7 @@ import slim
 from datasets import dataset_utils
 
 #验证集数量
-_NUM_TEST = 200
+_NUM_TEST = 120
 #随机种子
 _RANDOM_SEED = 0
 #数据块 把图片进行分割，对于数据量比较大的时候使用
