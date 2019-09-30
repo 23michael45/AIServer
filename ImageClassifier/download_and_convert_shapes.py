@@ -15,11 +15,11 @@ import slim
 from datasets import dataset_utils
 
 #验证集数量
-_NUM_TEST = 120
+_NUM_TEST = 12
 #随机种子
 _RANDOM_SEED = 0
 #数据块 把图片进行分割，对于数据量比较大的时候使用
-_NUM_SHARDS = 5
+_NUM_SHARDS = 1
 if os.name == "nt":
     #数据集路径
     DATASET_DIR = 'D:/DevelopProj/Dadao/ESP32Project/Datasets/Shapes/Dst/tfrecord'

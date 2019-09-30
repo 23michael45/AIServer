@@ -70,6 +70,6 @@ def eval():
 
 
 if __name__ == '__main__':
-    tfrecord()
-    #train()
-    eval()
+    #tfrecord()
+    train()
+    #eval()
