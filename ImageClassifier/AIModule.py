@@ -54,7 +54,7 @@ def getShape(image):
     img2gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
 
     _, thresh = cv2.threshold(img2gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
-    image, contours, hierarchy = cv2.findContours(thresh, 3, 2)
+    contours, hierarchy = cv2.findContours(thresh, 3, 2)
 
     miaxIndex,maxContour = findLargestContour(contours)
 

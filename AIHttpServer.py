@@ -27,7 +27,7 @@ import socket
 import PIL
 from PIL import Image
 from ImageClassifier.AIModule import getShape
-
+import numpy as np
  
 def GetIP():
     name = socket.getfqdn(socket.gethostname())
@@ -151,7 +151,7 @@ class AIServer(http.server.SimpleHTTPRequestHandler):
 
 
             jdict = {"category":"shape", "color":"0","shape":"xxx"}
-            jdict['shape'] = getShape(image)
+            jdict['shape'] = getShape(np.asarray(image))
             #jdict = {"category":"letter","color":"xxx","letter","xxx"}
             #jdict = {"category":"number","color":"xxx","number","xxx"}
             #jdict = {"category":"fail"}
