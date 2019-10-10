@@ -48,21 +48,26 @@ def findLargestContour(contours):
 
 def getShape(image):
     #image.show()
+    try:
+        if hasattr(image, "shape"):
+            if len(image.shape) == 3:
 
+                img2gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
 
+                _, thresh = cv2.threshold(img2gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+                contours, hierarchy = cv2.findContours(thresh, 3, 2)
 
-    img2gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+                miaxIndex,maxContour = findLargestContour(contours)
 
-    _, thresh = cv2.threshold(img2gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
-    contours, hierarchy = cv2.findContours(thresh, 3, 2)
+                epsilon = 0.01*cv2.arcLength(maxContour,True)
+                approx = cv2.approxPolyDP(maxContour,epsilon,True)
 
-    miaxIndex,maxContour = findLargestContour(contours)
-
-    epsilon = 0.01*cv2.arcLength(maxContour,True)
-    approx = cv2.approxPolyDP(maxContour,epsilon,True)
-
-    return shapeDict[approx2shape(approx)]
-
+                return shapeDict[approx2shape(approx)]
+        
+        return shapeDict[-1]
+    except cv2.error as e:
+        print(e)
+        return shapeDict[-1]
 
 def test():
     image = cv2.imread("D:/DevelopProj/Dadao/ESP32Project/Datasets/Shapes/Dst/tfrecord/shapes_photos/5/5_15.jpg")
