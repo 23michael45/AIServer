@@ -32,15 +32,19 @@ def approx2shape(approx):
     return -1;
 
 def findLargestContour(contours):
+    if contours is None:
+        retrun -1,None
+    if len(contours) == 0:
+        retrun -1,None
     maxPerimeter = sys.float_info.min
     maxIndex = -1
     for i in np.arange(len(contours)):
         contour = contours[i]
         
-        area = cv2.contourArea(contour)
+        #area = cv2.contourArea(contour)
         perimeter = cv2.arcLength(contour, True)
-        M = cv2.moments(contour)
-        cx, cy = M['m10'] / M['m00'], M['m01'] / M['m00'] 
+        #M = cv2.moments(contour)
+        #cx, cy = M['m10'] / M['m00'], M['m01'] / M['m00'] 
 
         if(perimeter > maxPerimeter):
             maxIndex = i
@@ -58,7 +62,8 @@ def getShape(image):
                 contours, hierarchy = cv2.findContours(thresh, 3, 2)
 
                 miaxIndex,maxContour = findLargestContour(contours)
-
+                if maxContour is None:
+                    return shapeDict[-1]
                 epsilon = 0.01*cv2.arcLength(maxContour,True)
                 approx = cv2.approxPolyDP(maxContour,epsilon,True)
 
