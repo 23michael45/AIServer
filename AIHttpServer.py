@@ -28,7 +28,8 @@ import PIL
 from PIL import Image
 from ImageClassifier.AIModule import getShape
 import numpy as np
- 
+from socketserver import ThreadingMixIn
+import cgi
 def GetIP():
     name = socket.getfqdn(socket.gethostname())
     addr = socket.gethostbyname(name)
@@ -87,14 +88,37 @@ class AIServer(http.server.SimpleHTTPRequestHandler):
         length = f.tell()
         f.seek(0)
         self.send_response(200)
-        self.send_header("Content-type", "application/json")
+        self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", str(length))
         self.end_headers()
         if f:
             self.copyfile(f, self.wfile)
             f.close()
+
     def deal_formdata(self):
-        content_type = self.headers['content-type']
+        form = cgi.FieldStorage(
+        fp=self.rfile,
+        headers=self.headers,
+        environ={'REQUEST_METHOD':'POST',
+                    'CONTENT_TYPE':self.headers['Content-Type'],
+                    }
+        )
+
+        image = None
+        for field in form.keys():
+            field_item = form[field]
+            filename = field_item.filename
+            filevalue  = field_item.value
+            filesize = len(filevalue)
+
+            
+            byte_stream = BytesIO(filevalue);
+            image = Image.open(byte_stream)
+            
+        return image
+
+    def deal_formdata_(self):
+        content_type = self.headers['Content-Type']
         if not content_type:
             return (False, "Content-Type header doesn't contain boundary")
         contents = content_type.split("=")
@@ -102,7 +126,9 @@ class AIServer(http.server.SimpleHTTPRequestHandler):
         if(len(contents) < 2):
                 return (False, "Content-Type header size < 2")
         boundary = contents[1].encode()
-        remainbytes = int(self.headers['content-length'])
+
+        remainbytes = 9999999
+        #remainbytes = int(self.headers['Content-Length'])
         
         line = self.rfile.readline()
         remainbytes -= len(line)
@@ -120,7 +146,9 @@ class AIServer(http.server.SimpleHTTPRequestHandler):
         line = self.rfile.readline()
         remainbytes -= len(line)
 
-        filedata = self.rfile.read(remainbytes);
+        filedata = self.rfile.read();
+        #filedata = self.rfile.read(remainbytes);
+
         byte_stream = BytesIO(filedata);
         image = Image.open(byte_stream)
         #image.show()
@@ -420,13 +448,16 @@ class CORSRequestHandler (SimpleHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Origin', '*')
         SimpleHTTPRequestHandler.end_headers(self)
  
-def start_server(HandlerClass = SimpleHTTPRequestHandler,
-         ServerClass = http.server.HTTPServer):
+    
+class ThreadingHttpServer( ThreadingMixIn,http.server.HTTPServer ):
+    pass
+
+def start_server():
     #http.server.test(HandlerClass, ServerClass)
     
     name ,addr = GetIP()
     host = ('0.0.0.0', 8888)
-    server = http.server.HTTPServer(host, AIServer)
+    server = ThreadingHttpServer(host, AIServer)
     print('Starting server, listen at: %s:%s' % host)
     server.serve_forever()
  
